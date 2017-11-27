@@ -5,70 +5,128 @@ import TaskForm from './components/TaskForm';
 import SearchControl from './components/SearchControl';
 import SortControl from './components/SortControl';
 import FilterControl from './components/FilterControl';
+import TaskList from './components/TaskList';
+
+import {randomString} from './helpers/StringHelpers';
 
 class App extends Component {
-  render() {
-    return (
-        <div className="container">
-            <div className="text-center"><h1>Quản Lý Công Việc</h1><hr /></div>
-            <div className="row">
-                <div className="col-xs-12 col-sm-12 col-lg-4">
-                    {/* TaskForm */}
-                    <TaskForm />
-                </div>
-                <div className="col-xs-12 col-sm-12 col-lg-8">
-                    <button type="button" className="btn btn-primary">
-                        <span className="fa fa-plus mr-5"> Thêm công việc</span>
-                    </button>
-<<<<<<< HEAD
-                    {/* Search & Sort */}
-=======
-                    {/* Search & Sort & Filter */}
->>>>>>> update public folder
-                    <div className="row mt-15">
-                        <SearchControl />
-                        <SortControl />
-                    </div>
-                    <div className="row mt-15">
-                        <FilterControl />
-                    </div>
-                    {/* List */}
-                    <div className="row mt-15">
-                        <div className="col-xs-12 col-md-12 col-lg-12">
-                            <table className="table table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th className="text-center">STT</th>
-                                        <th className="text-center">Tên</th>
-                                        <th className="text-center">Trạng thái</th>
-                                        <th className="text-center">Hành động</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                            <td>1</td>
-                                            <td>Học ReactJS</td>
-                                            <td className="text-center">
-                                                <span className="label label-danger">Kích hoạt</span>
-                                            </td>
-                                            <td className="text-center" width="30%">
-                                                <button type="button" className="btn btn-info">
-                                                    <span className="fa fa-pencil mr-5"></span> Sửa
-                                                </button>
-                                                &nbsp;
-                                                <button type="button" className="btn btn-danger">
-                                                    <span className="fa fa-pencil mr-5"></span> Xóa
-                                                </button>
-                                            </td>
-                                        </tr>
-                                </tbody>
-                            </table>
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            tasks: [],
+            isDisplayForm: false
+        };
+    }
+
+    componentWillMount() {
+        if (localStorage && localStorage.getItem('tasks')) {
+            var tasks = JSON.parse(localStorage.getItem('tasks'));
+
+            this.setState({
+                tasks
+            });
+        }
+    }
+
+    handleGenerateData() {
+        var tasks = [
+            {
+                id: this.generateId(),
+                name: 'Fucking FFTool',
+                status: true,
+            },
+            {
+                id: this.generateId(),
+                name: 'EPiCA bullshit',
+                status: false,
+            }
+        ];
+
+        this.setState({
+            tasks
+        });
+
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    handleDisplayForm = () => {
+        this.setState({
+            isDisplayForm: true
+        });
+    }
+
+    handleCloseForm = () => {
+        this.setState({
+            isDisplayForm: false
+        });
+    }
+
+    handleSubmitForm = (data) => {
+        data.id = this.generateId();
+
+        var {tasks} = this.state;
+
+        tasks.push(data);
+
+        this.setState({
+           tasks
+        });
+
+        localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
+    }
+
+    generateId() {
+        return randomString() + randomString() + '-' + randomString() + '-'
+            + randomString() + randomString() + '-' + randomString();
+    }
+
+    render() {
+        return (
+            <div className="container">
+                <div className="text-center"><h1>Quản Lý Công Việc</h1><hr /></div>
+                <div className="row">
+                    {this.state.isDisplayForm ? (
+                        <div className="col-xs-12 col-sm-12 col-lg-4">
+                        {/* TaskForm */}
+                        <TaskForm handleSubmitForm={this.handleSubmitForm} handleCloseForm={ this.handleCloseForm } />
+                        </div> )
+                        : (<div></div>)
+                    }
+                    <div className={ this.state.isDisplayForm
+                        ? 'col-xs-12 col-sm-12 col-lg-8'
+                        : 'col-xs-12 col-sm-12 col-lg-12' }>
+
+                        {this.state.isDisplayForm === false ? (
+                        <button type="button"
+                                className="btn btn-primary"
+                                onClick={ this.handleDisplayForm }
+                            >
+                            <span className="fa fa-plus mr-5"> Thêm công việc</span>
+                        </button> ) : (<div></div>) }
+
+                        <button type="button"
+                                className="btn btn-info ml-5"
+                                onClick={ this.handleGenerateData.bind(this) }>
+                            Tạo dữ liệu mẫu
+                        </button>
+                        {/* Search & Sort & Filter */}
+                        <div className="row mt-15">
+                            <SearchControl />
+                            <SortControl />
+                        </div>
+                        <div className="row mt-15">
+                            <FilterControl />
+                        </div>
+                        {/* List */}
+                        <div className="row mt-15">
+                            <TaskList tasks={ this.state.tasks } />
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
   }
 }
 
